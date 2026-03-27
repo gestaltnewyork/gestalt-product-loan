@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  #loan-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+    font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .ln-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 2rem;
+  }
+  .ln-header h1 {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+  }
+  .ln-header p {
+    font-size: 12px;
+    color: #888;
+    letter-spacing: 0.04em;
+  }
+  .ln-tag {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border: 1px solid #1a1a1a;
+    color: #1a1a1a;
+  }
+
+  /* ── Section labels ── */
+  .ln-section {
+    margin-bottom: 2rem;
+  }
+  .ln-section-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  /* ── Client info grid ── */
+  .ln-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 32px;
+  }
+  .ln-info-grid.three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .ln-field label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .ln-field .ln-value {
+    font-size: 14px;
+    color: #1a1a1a;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e0e0e0;
+    min-height: 26px;
+  }
+
+  /* ── Date pills ── */
+  .ln-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .ln-date-pill {
+    background: #f7f7f5;
+    padding: 12px 16px;
+  }
+  .ln-date-pill .dp-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .ln-date-pill .dp-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+
+  /* ── Items table ── */
+  .ln-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+  table.ln-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.ln-table th {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    font-weight: 400;
+    padding: 0 10px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  table.ln-table th.r { text-align: right; }
+  table.ln-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+    color: #1a1a1a;
+  }
+  table.ln-table td.muted { color: #888; }
+  table.ln-table td.r { text-align: right; }
+  .ln-totals {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .ln-total-row {
+    display: flex;
+    gap: 48px;
+    font-size: 13px;
+  }
+  .ln-total-row .tl { color: #888; min-width: 120px; text-align: right; }
+  .ln-total-row .tv { min-width: 80px; text-align: right; color: #1a1a1a; }
+  .ln-total-row.grand .tl,
+  .ln-total-row.grand .tv {
+    font-weight: 500;
+    font-size: 14px;
+    color: #1a1a1a;
+  }
+
+  /* ── Agreement text ── */
+  .ln-agreement-text {
+    background: #f7f7f5;
+    padding: 1.25rem 1.5rem;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+  .ln-agreement-text p { margin-bottom: 10px; }
+  .ln-agreement-text p:last-child { margin-bottom: 0; }
+
+  /* ── Signature ── */
+  .ln-sig-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 8px;
+    display: block;
+  }
+  #sigCanvas {
+    width: 100%;
+    height: 130px;
+    border: 1px solid #d0d0d0;
+    background: #fff;
+    cursor: crosshair;
+    display: block;
+    touch-action: none;
+  }
+  .sig-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+    margin-bottom: 1.5rem;
+  }
+  .btn-clear {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    background: none;
+    border: 1px solid #d0d0d0;
+    padding: 5px 14px;
+    color: #888;
+    cursor: pointer;
+  }
+  .btn-clear:hover { border-color: #999; color: #555; }
+
+  /* ── Client fields ── */
+  .ln-client-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 1.5rem;
+  }
+  .ln-client-fields input {
+    width: 100%;
+    font-size: 14px;
+    font-family: inherit;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid #d0d0d0;
+    background: transparent;
+    color: #1a1a1a;
+    outline: none;
+  }
+  .ln-client-fields input:focus { border-bottom-color: #1a1a1a; }
+  .ln-client-fields input::placeholder { color: #bbb; }
+
+  /* ── Checkbox ── */
+  .ln-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+    color: #555;
+  }
+  .ln-checkbox-row input[type="checkbox"] {
+    margin-top: 2px;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    accent-color: #1a1a1a;
+  }
+
+  /* ── Submit ── */
+  .ln-submit-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .ln-submit-btn:hover { background: #333; }
+  .ln-submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* ── Confirmation ── */
+  #ln-confirmation {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+  #ln-confirmation .conf-mark {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #1a1a1a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 20px;
+  }
+  #ln-confirmation h2 {
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  #ln-confirmation p {
+    font-size: 13px;
+    color: #888;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  /* ── Error ── */
+  .ln-error {
+    display: none;
+    background: #fff5f5;
+    border: 1px solid #ffcccc;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #c00;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .ln-info-grid, .ln-info-grid.three, .ln-client-fields { grid-template-columns: 1fr 1fr; }
+    .ln-dates { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 420px) {
+    .ln-info-grid, .ln-info-grid.three, .ln-client-fields { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="loan-wrap">
+
+  <!-- Header -->
+  <div class="ln-header">
+    <h1>Gestalt New York</h1>
+    <p>614 Warren Street, Hudson NY 12534 &nbsp;&middot;&nbsp; 646-389-4177</p>
+    <span class="ln-tag">Product Loan Agreement</span>
+  </div>
+
+  <!-- Main form -->
+  <div id="ln-form-body">
+
+    <!-- Borrower info -->
+    <div class="ln-section">
+      <div class="ln-section-label">Borrower information</div>
+      <div class="ln-info-grid" style="margin-bottom: 16px;">
+        <div class="ln-field">
+          <label>Name</label>
+          <div class="ln-value" id="d-name"></div>
+        </div>
+        <div class="ln-field">
+          <label>Company</label>
+          <div class="ln-value" id="d-company"></div>
+        </div>
+      </div>
+      <div class="ln-info-grid" style="grid-template-columns:1fr; margin-bottom: 16px;">
+        <div class="ln-field">
+          <label>Address</label>
+          <div class="ln-value" id="d-address"></div>
+        </div>
+      </div>
+      <div class="ln-info-grid">
+        <div class="ln-field">
+          <label>Email</label>
+          <div class="ln-value" id="d-email"></div>
+        </div>
+        <div class="ln-field">
+          <label>Phone</label>
+          <div class="ln-value" id="d-phone"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="ln-dates">
+      <div class="ln-date-pill">
+        <div class="dp-label">Date of loan</div>
+        <div class="dp-value" id="d-loan-date"></div>
+      </div>
+      <div class="ln-date-pill">
+        <div class="dp-label">Due back by</div>
+        <div class="dp-value" id="d-due-date"></div>
+      </div>
+    </div>
+
+    <!-- Items table -->
+    <div class="ln-section">
+      <div class="ln-section-label">Loaned items</div>
+      <div class="ln-table-wrap">
+        <table class="ln-table">
+          <thead>
+            <tr>
+              <th style="width:40px">Qty</th>
+              <th style="width:110px">SKU</th>
+              <th>Description</th>
+              <th class="r" style="width:100px">Unit price</th>
+              <th class="r" style="width:100px">Ext. price</th>
+            </tr>
+          </thead>
+          <tbody id="items-tbody"></tbody>
+        </table>
+      </div>
+      <div class="ln-totals" id="ln-totals"></div>
+    </div>
+
+    <!-- Condition -->
+    <div class="ln-section">
+      <div class="ln-section-label">Condition before loan</div>
+      <div class="ln-info-grid">
+        <div class="ln-field">
+          <label>Noted by</label>
+          <div class="ln-value" id="d-condition-by"></div>
+        </div>
+        <div class="ln-field">
+          <label>Condition</label>
+          <div class="ln-value" id="d-condition"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agreement -->
+    <div class="ln-section">
+      <div class="ln-section-label">Loan agreement</div>
+      <div class="ln-agreement-text">
+        <p>Gestalt New York is loaning the above merchandise to the borrower named above. All items must be returned to Gestalt New York, 614 Warren Street, Hudson, NY 12534 by the due date noted above.</p>
+        <p>Only items returned in original loan condition will be accepted. Any imperfections must be noted and approved by Gestalt New York before items leave the showroom.</p>
+        <p>Gestalt New York will retain a credit card number from the borrower in exchange for loaned merchandise. If merchandise is not returned by the agreed date and in original condition, Gestalt New York reserves the right to charge the credit card the full retail price listed above.</p>
+      </div>
+
+      <!-- Signature -->
+      <span class="ln-sig-label">Signature</span>
+      <canvas id="sigCanvas"></canvas>
+      <div class="sig-actions">
+        <button class="btn-clear" type="button" onclick="clearSig()">Clear signature</button>
+      </div>
+
+      <!-- Client input fields -->
+      <div class="ln-client-fields">
+        <div class="ln-field">
+          <label>Print name</label>
+          <input type="text" id="f-print-name" placeholder="Full name" autocomplete="name">
+        </div>
+        <div class="ln-field">
+          <label>Today's date</label>
+          <input type="text" id="f-sign-date" placeholder="e.g. March 27, 2026">
+        </div>
+        <div class="ln-field">
+          <label>Credit card (last 4)</label>
+          <input type="text" id="f-cc" placeholder="0000" maxlength="4" inputmode="numeric">
+        </div>
+      </div>
+
+      <!-- Agreement checkbox -->
+      <div class="ln-checkbox-row">
+        <input type="checkbox" id="f-agree">
+        <label for="f-agree">I have read and agree to the loan agreement above. I understand that failure to return items in original condition by the due date may result in a charge to my credit card for the full retail value.</label>
+      </div>
+
+      <!-- Error message -->
+      <div class="ln-error" id="ln-error">Please complete all fields, sign above, and check the agreement box before submitting.</div>
+
+      <!-- Submit -->
+      <button class="ln-submit-btn" id="ln-submit-btn" onclick="submitLoan()">Submit loan agreement</button>
+    </div>
+
+  </div><!-- /ln-form-body -->
+
+  <!-- Confirmation -->
+  <div id="ln-confirmation">
+    <div class="conf-mark">&#10003;</div>
+    <h2>Agreement submitted</h2>
+    <p id="conf-msg">Thank you. A copy of this loan agreement has been recorded. Please retain this confirmation for your records.</p>
+  </div>
+
+</div><!-- /loan-wrap -->
+
+<script>
+// ── READ URL PARAMETERS ──────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+
+function p(key, fallback) {
+  return params.get(key) || fallback || "";
+}
+
+// ── POPULATE BORROWER INFO ───────────────────────────────────
+document.getElementById("d-name").textContent       = p("name");
+document.getElementById("d-company").textContent    = p("company");
+document.getElementById("d-address").textContent    = p("address");
+document.getElementById("d-email").textContent      = p("email");
+document.getElementById("d-phone").textContent      = p("phone");
+document.getElementById("d-loan-date").textContent  = p("loandate");
+document.getElementById("d-due-date").textContent   = p("duedate");
+document.getElementById("d-condition-by").textContent = p("condby", "Gestalt New York");
+document.getElementById("d-condition").textContent  = p("cond", "Good — no visible damage");
+
+// Pre-fill today's date in signature field
+const today = new Date();
+const todayStr = today.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+document.getElementById("f-sign-date").value = todayStr;
+
+// ── POPULATE ITEMS TABLE ─────────────────────────────────────
+const tbody = document.getElementById("items-tbody");
+let subtotal = 0;
+let itemCount = 0;
+
+for (let i = 1; i <= 6; i++) {
+  const qty  = p("i" + i + "qty");
+  const sku  = p("i" + i + "sku");
+  const desc = p("i" + i + "desc");
+  const unit = p("i" + i + "unit");
+  const ext  = p("i" + i + "ext");
+
+  if (!desc && !sku) continue;
+  itemCount++;
+
+  const extNum = parseFloat((ext || "0").replace(/[$,]/g, "")) || 0;
+  subtotal += extNum;
+
+  const tr = document.createElement("tr");
+  tr.innerHTML =
+    '<td>' + (qty || "1") + '</td>' +
+    '<td class="muted">' + sku + '</td>' +
+    '<td>' + desc + '</td>' +
+    '<td class="r">' + formatCurrency(parseFloat((unit || "0").replace(/[$,]/g, ""))) + '</td>' +
+    '<td class="r">' + formatCurrency(extNum) + '</td>';
+  tbody.appendChild(tr);
+}
+
+// Totals
+const totalsEl = document.getElementById("ln-totals");
+totalsEl.innerHTML =
+  '<div class="ln-total-row"><span class="tl">Subtotal</span><span class="tv">' + formatCurrency(subtotal) + '</span></div>' +
+  '<div class="ln-total-row"><span class="tl">Sales tax</span><span class="tv">—</span></div>' +
+  '<div class="ln-total-row grand"><span class="tl">Total retail value</span><span class="tv">' + formatCurrency(subtotal) + '</span></div>';
+
+function formatCurrency(n) {
+  if (!n && n !== 0) return "—";
+  return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+// ── SIGNATURE PAD ────────────────────────────────────────────
+const canvas = document.getElementById("sigCanvas");
+const ctx = canvas.getContext("2d");
+let drawing = false;
+let hasSig = false;
+
+function resizeCanvas() {
+  const ratio = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * ratio;
+  canvas.height = rect.height * ratio;
+  ctx.scale(ratio, ratio);
+  ctx.strokeStyle = "#1a1a1a";
+  ctx.lineWidth = 1.5;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+}
+window.addEventListener("resize", resizeCanvas);
+setTimeout(resizeCanvas, 100);
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+}
+
+canvas.addEventListener("mousedown", e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener("mousemove", e => { if (!drawing) return; hasSig = true; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener("mouseup", () => { drawing = false; });
+canvas.addEventListener("mouseleave", () => { drawing = false; });
+canvas.addEventListener("touchstart", e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener("touchmove", e => { e.preventDefault(); if (!drawing) return; hasSig = true; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener("touchend", () => { drawing = false; });
+
+function clearSig() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  hasSig = false;
+}
+
+// ── SUBMIT ───────────────────────────────────────────────────
+async function submitLoan() {
+  const printName = document.getElementById("f-print-name").value.trim();
+  const signDate  = document.getElementById("f-sign-date").value.trim();
+  const cc        = document.getElementById("f-cc").value.trim();
+  const agreed    = document.getElementById("f-agree").checked;
+  const errEl     = document.getElementById("ln-error");
+
+  if (!printName || !signDate || !cc || !agreed || !hasSig) {
+    errEl.style.display = "block";
+    errEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  errEl.style.display = "none";
+
+  const btn = document.getElementById("ln-submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+
+  // Build submission payload
+  const sigData = canvas.toDataURL("image/png");
+
+  const payload = {
+    // Borrower info
+    "Customer name":    p("name"),
+    "Company":          p("company"),
+    "Address":          p("address"),
+    "Email":            p("email"),
+    "Phone":            p("phone"),
+    "Date of loan":     p("loandate"),
+    "Due date":         p("duedate"),
+    // Items summary
+    "Items loaned":     buildItemsSummary(),
+    "Total retail value": formatCurrency(subtotal),
+    "Condition":        p("cond", "Good — no visible damage"),
+    // Client signed fields
+    "Signed name":      printName,
+    "Signed date":      signDate,
+    "Credit card last 4": cc,
+    "Agreement accepted": "Yes",
+    // Signature image as data URL — Formspree passes this as text
+    "_replyto":         p("email"),
+    "_subject":         "Product loan agreement signed — " + p("name") + " / " + p("company"),
+  };
+
+  // ── REPLACE THIS URL WITH YOUR FORMSPREE ENDPOINT ──
+  const FORMSPREE_URL = "https://formspree.io/f/xzdkddvr";
+
+  try {
+    const res = await fetch(FORMSPREE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      document.getElementById("ln-form-body").style.display = "none";
+      const conf = document.getElementById("ln-confirmation");
+      conf.style.display = "block";
+      document.getElementById("conf-msg").textContent =
+        "Thank you, " + printName + ". This loan agreement has been recorded and a copy sent to Gestalt New York. Please retain this page for your records.";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      throw new Error("Submission failed");
+    }
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = "Submit loan agreement";
+    errEl.textContent = "There was a problem submitting. Please try again or contact Gestalt New York directly.";
+    errEl.style.display = "block";
+  }
+}
+
+function buildItemsSummary() {
+  let lines = [];
+  for (let i = 1; i <= 6; i++) {
+    const desc = p("i" + i + "desc");
+    const qty  = p("i" + i + "qty");
+    const ext  = p("i" + i + "ext");
+    if (!desc) continue;
+    lines.push(qty + "x " + desc + " — " + ext);
+  }
+  return lines.join(" | ");
+}
+</script>
+</body>
+</html>
